@@ -8,7 +8,8 @@ export async function daoGetUserByUsernameAndPassword(username:string, password:
 
     try{
         client=await connectionPool.connect();
-        const result = await client.query('',[username,password]);
+        const result = await client.query('SELECT * FROM mspaper.user natural join mspaper.user_role natural join mspaper."role" WHERE username = $1 and  password = $2',
+        [username,password]);
         if(result.rowCount === 0){
             throw 'bad credentials';
         }else{
