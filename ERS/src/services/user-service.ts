@@ -1,9 +1,15 @@
 import { User } from "../models/user";
-import { daoGetUserByUsernameAndPassword, daoGetAllUsers } from "../respositories/user-dao";
+import { daoGetUserByUsernameAndPassword, daoGetAllUsers, daoGetUserById } from "../respositories/user-dao";
 
+//find users by id
 
+export function getUserById(id: number): Promise<User> {
+    console.log('Service: you are seraching for user ' + id);
 
+    return daoGetUserById(id);
+}
 
+//find all users
 export async function getAllUsers(): Promise<User[]> {
     //do some processing
     try {
