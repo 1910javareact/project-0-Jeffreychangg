@@ -2,12 +2,15 @@ import express from 'express';
 import bodyparser from 'body-parser';
 import { sessionMiddleware } from './middleware/session-middleware';
 import { getUserByUsernameAndPassword } from './services/user-service';
+import { userRouter } from './routers/user-router';
 
 const app = express();
 
 app.use(bodyparser.json());
 
 app.use(sessionMiddleware)
+
+app.use('/users', userRouter)
 
 app.post('/login',async(req,res)=>{
     const {username,password} = req.body;

@@ -1,8 +1,11 @@
 import { PoolClient } from "pg";
 import { connectionPool } from ".";
-import { userDTOtoUser } from "../util/Userdto-to-user";
+import { userDTOtoUser, multiUserDTOConvertor } from "../util/Userdto-to-user";
 import { User } from "../models/user";
 
+
+
+//login
 export async function daoGetUserByUsernameAndPassword(username:string, password:string):Promise<User>{
     let client:PoolClient;
 
@@ -11,16 +14,16 @@ export async function daoGetUserByUsernameAndPassword(username:string, password:
         const result = await client.query('SELECT * FROM mspaper.user natural join mspaper.user_role natural join mspaper."role" WHERE username = $1 and  password = $2',
         [username,password]);
         if(result.rowCount === 0){
-            throw 'bad credentials';
+            throw 'Invalid Credentials';
         }else{
             return userDTOtoUser(result.rows);
         }
     }catch (e) {
         console.log(e);
-        if (e==='bad credentials'){
+        if (e==='Invalid Credentials'){
             throw{
-                status: 401,
-                message: 'bad credentails'
+                status: 400,
+                message: 'Invalid Credentials'
             };
         }else{
             throw{
@@ -31,4 +34,25 @@ export async function daoGetUserByUsernameAndPassword(username:string, password:
     }finally {
         client && client.release();
     } 
+}
+
+export async function daoGetAllUsers(): Promise<User[]> {
+    let client: PoolClient;
+
+    try {
+        //every time we use the await keyword
+        client = await connectionPool.connect();
+        //we register all code beneath it as a callback function
+        //for when the promise resolves
+        const result = await client.query('SELECT * FROM mspaper.user natural join mspaper.user_role natural join mspaper.role');
+        return multiUserDTOConvertor(result.rows);
+    } catch (e) {
+        console.log(e);
+        throw {
+            status: 500,
+            message: 'Internal Server Error'
+        };
+    } finally {
+        client && client.release();
+    }
 }
