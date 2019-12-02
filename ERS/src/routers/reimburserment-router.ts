@@ -1,6 +1,7 @@
 import express from 'express'
-import { getReimbursementByStatusId, getReimbursementByUserId } from '../services/reimbursement-service';
+import { getReimbursementByStatusId, getReimbursementByUserId, saveOneReimbursement, updateReimbursement } from '../services/reimbursement-service';
 import { authorization } from '../middleware/auth-middleware';
+import { Reimbursement } from '../models/reimbursement';
 export const reimbursementRouter=express.Router();
 
 //find reimbursement by status id
@@ -46,3 +47,46 @@ reimbursementRouter.get('/author/userId/:userId', [authorization(['finance-manag
             }
         }
     });
+
+    //submit reimbursement
+
+    reimbursementRouter.post('', [authorization(['finance-manager', 'admin', 'user'])],
+    async (req, res) => {
+        const { body } = req;
+        const newR = new Reimbursement(0, 0, 0, 0, 0, '', 0, 0, 0);
+        try {
+            let error = false;
+            for (const key in newR) {
+                if (body[key] === undefined) {
+                    res.status(400).send('Please include all reimbursement fields');
+                    error = true;
+                    break;
+                } else {
+                    newR[key] = body[key];
+                }
+            }
+            if (!error) {
+                newR.author = req.session.user.userId;
+                const reimbursement = await saveOneReimbursement(newR);
+                res.status(201).json(reimbursement);
+            }
+        } catch (e) {
+            res.status(e.status).send(e.message);
+        }
+    });
+
+    //update reimburesment
+
+    reimbursementRouter.patch('', [authorization(['finance-manager'])],
+async (req, res) => {
+    try {
+        const { body } = req;
+        const newR = new Reimbursement(0, 0, 0, 0, 0, '', 0, 0, 0);
+        newR.reimbursementId = body.reimbursementId;
+        newR.status = body.status;
+        const update = await updateReimbursement(newR);
+        res.status(200).json(update);
+    } catch (e) {
+        res.status(e.status).send(e.message);
+    }
+});
