@@ -1,32 +1,60 @@
 import express from 'express';
-import { getAllUsers, getUserById } from '../services/user-service';
+import { getAllUsers, getUserById, updateUser } from '../services/user-service';
+import { authorization } from '../middleware/auth-middleware';
+
+
+
+export const userRouter=express.Router();
+
 
 
 //find all users
-export const userRouter=express.Router();
-
-userRouter.get('', async (req, res)=> {
+userRouter.get('', [authorization(['finance-manager'])], async (req, res)=> {
     try {
-        const users = await getAllUsers(); //this function is in services
+        const users = await getAllUsers(); 
         res.json(users);
     } catch (e) {
         res.status(e.status).send(e.message);
     }
-})
+});
 
 //find user by ID
-userRouter.get('/:id', async (req, res) => {
+userRouter.get('/:id', [authorization(['finance-manager', 'admin', 'user'])], async (req, res) => {
     const id = +req.params.id; //from req.params, give me id
     if (isNaN(id)) {
         res.sendStatus(400);
-    } else {
+    }else if (req.session.user.role.role === 'finance-manager') {
         try {
             const user = await getUserById(id);
-            res.json(user);
-        } catch (e) {
-            res.status(e.status).send(e.message);
+            res.status(200).json(user);
+        } catch (error) {
+            res.status(error.status).send(error.message);
         }
-
+    }else {
+        try {
+            const user = await getUserById(id);
+            if (req.session.user.userId === user.userId) {
+                res.status(200).json(user);
+            }else {
+                res.sendStatus(401);
+            }
+        } catch (error) {
+            res.status(error.status).send(error.message);
+        }
     }
 });
+//update user
 
+
+userRouter.patch('',  [authorization(['admin'])], async(req,res)=>{
+
+    try {
+        const {body} = req;
+        const update = await updateUser(body);
+        res.status(200).json(update);
+    } catch (e) {
+        res.status(e.status).send(e.message);
+    }
+
+
+});

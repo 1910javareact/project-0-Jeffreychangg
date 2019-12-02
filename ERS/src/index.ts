@@ -3,6 +3,8 @@ import bodyparser from 'body-parser';
 import { sessionMiddleware } from './middleware/session-middleware';
 import { getUserByUsernameAndPassword } from './services/user-service';
 import { userRouter } from './routers/user-router';
+import { reimbursementRouter } from './routers/reimburserment-router';
+
 
 const app = express();
 
@@ -12,6 +14,10 @@ app.use(sessionMiddleware)
 
 app.use('/users', userRouter)
 
+app.use('/reimbursements',reimbursementRouter)
+
+
+//login
 app.post('/login',async(req,res)=>{
     const {username,password} = req.body;
     if (!username || !password){
