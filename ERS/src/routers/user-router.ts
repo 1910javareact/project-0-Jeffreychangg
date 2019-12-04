@@ -1,6 +1,7 @@
 import express from 'express';
-import { getAllUsers, getUserById, updateUser } from '../services/user-service';
+import { getAllUsers, getUserById} from '../services/user-service';
 import { authorization } from '../middleware/auth-middleware';
+
 
 
 
@@ -21,18 +22,19 @@ userRouter.get('', [authorization(['finance-manager'])], async (req, res)=> {
 //find user by ID
 userRouter.get('/:id', [authorization(['finance-manager', 'admin', 'user'])], async (req, res) => {
     const id = +req.params.id; //from req.params, give me id
+    const user = await getUserById(id);
     if (isNaN(id)) {
         res.sendStatus(400);
     }else if (req.session.user.role.role === 'finance-manager') {
         try {
-            const user = await getUserById(id);
+            
             res.status(200).json(user);
         } catch (error) {
             res.status(error.status).send(error.message);
         }
     }else {
         try {
-            const user = await getUserById(id);
+            
             if (req.session.user.userId === user.userId) {
                 res.status(200).json(user);
             }else {
@@ -43,18 +45,17 @@ userRouter.get('/:id', [authorization(['finance-manager', 'admin', 'user'])], as
         }
     }
 });
-//update user
 
+//update user 
 
-userRouter.patch('',  [authorization(['admin'])], async(req,res)=>{
+/*userRouter.patch('',[authorization(['admin'])],async(req,res)=>{
+    const {body}=req;
 
-    try {
-        const {body} = req;
-        const update = await updateUser(body);
-        res.status(200).json(update);
-    } catch (e) {
-        res.status(e.status).send(e.message);
+    try{
+
+    }catch(e){
+        res.status(e.status).send(e.message);       
     }
 
-
-});
+})
+*/

@@ -1,7 +1,10 @@
 import express from 'express'
-import { getReimbursementByStatusId, getReimbursementByUserId, saveOneReimbursement, updateReimbursement } from '../services/reimbursement-service';
+import { getReimbursementByStatusId, getReimbursementByUserId,submitReimbursement} from '../services/reimbursement-service';
 import { authorization } from '../middleware/auth-middleware';
+
 import { Reimbursement } from '../models/reimbursement';
+
+
 export const reimbursementRouter=express.Router();
 
 //find reimbursement by status id
@@ -22,7 +25,7 @@ reimbursementRouter.get('/status/:statusId', [authorization(['finance-manager'])
 
 //find reimbursement by user id
 
-reimbursementRouter.get('/author/userId/:userId', [authorization(['finance-manager', 'admin', 'user'])],
+reimbursementRouter.get('/author/:userId', [authorization(['finance-manager', 'admin', 'user'])],
     async (req, res) => {
         const id = +req.params.userId;
         if (isNaN(id)) {
@@ -32,6 +35,7 @@ reimbursementRouter.get('/author/userId/:userId', [authorization(['finance-manag
                 const reimbursement = await getReimbursementByUserId(id);
                 res.status(200).json(reimbursement);
             } catch (e) {
+                console.log(e)
                 res.status(e.status).send(e.message);
             }
         } else {
@@ -43,14 +47,14 @@ reimbursementRouter.get('/author/userId/:userId', [authorization(['finance-manag
                     res.sendStatus(401);
                 }
             } catch (e) {
+                console.log(e)
                 res.status(e.status).send(e.message);
             }
         }
     });
 
-    //submit reimbursement
-
-    reimbursementRouter.post('', [authorization(['finance-manager', 'admin', 'user'])],
+//submit
+reimbursementRouter.post('', [authorization(['finance-manager', 'admin', 'user'])],
     async (req, res) => {
         const { body } = req;
         const newR = new Reimbursement(0, 0, 0, 0, 0, '', 0, 0, 0);
@@ -67,26 +71,10 @@ reimbursementRouter.get('/author/userId/:userId', [authorization(['finance-manag
             }
             if (!error) {
                 newR.author = req.session.user.userId;
-                const reimbursement = await saveOneReimbursement(newR);
+                const reimbursement = await submitReimbursement(newR);
                 res.status(201).json(reimbursement);
             }
         } catch (e) {
             res.status(e.status).send(e.message);
         }
     });
-
-    //update reimburesment
-
-    reimbursementRouter.patch('', [authorization(['finance-manager'])],
-async (req, res) => {
-    try {
-        const { body } = req;
-        const newR = new Reimbursement(0, 0, 0, 0, 0, '', 0, 0, 0);
-        newR.reimbursementId = body.reimbursementId;
-        newR.status = body.status;
-        const update = await updateReimbursement(newR);
-        res.status(200).json(update);
-    } catch (e) {
-        res.status(e.status).send(e.message);
-    }
-});

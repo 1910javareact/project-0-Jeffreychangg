@@ -28,7 +28,8 @@ app.post('/login',async(req,res)=>{
         req.session.user = user;
         res.json(user);
     } catch (e) {
-        res.status(e.status).send(e.message);
+        res.status(e.status);
+        res.send(e.message);
     }
 
 })

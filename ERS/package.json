@@ -4,7 +4,9 @@
   "description": "ERS",
   "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --exec ts-node src/index.ts",
+    "deploy": "ts-node src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -17,14 +19,16 @@
   },
   "homepage": "https://github.com/1910javareact/project-0-Jeffreychangg#readme",
   "devDependencies": {
-    "@types/express": "^4.17.2",
-    "@types/express-session": "^1.15.16",
-    "ts-node": "^8.5.2",
-    "typescript": "^3.7.2"
+   
+    
   },
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "express-session": "^1.17.0"
+    "express-session": "^1.17.0",
+    "ts-node": "^8.5.2",
+    "typescript": "^3.7.2",
+    "@types/express": "^4.17.2",
+    "@types/express-session": "^1.15.16"
   }
 }

@@ -18,7 +18,5 @@ export class Reimbursement{
             this.resolver=resolver
             this.status=status
             this.type=type
-
-
     }
   }
