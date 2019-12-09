@@ -104,7 +104,6 @@ export async function daoUpdateUser(user: User): Promise<User> {
         const result = await client.query('SELECT * FROM mspaper."user" natural join mspaper.user_role natural join mspaper."role" where user_id = $1',
         [user.userId]);
         await client.query('COMMIT');
-        console.log(user)
         if (result.rowCount > 0) {
             return userDTOtoUser(result.rows);
         } else {

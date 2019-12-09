@@ -1,5 +1,5 @@
 import { Reimbursement } from "../models/reimbursement";
-import { daoGetReimbursementByStatusId, daoGetReimbursementByUserId,  daoSubmitReimbursement} from "../respositories/reimbursement-dao";
+import { daoGetReimbursementByStatusId, daoGetReimbursementByUserId,  daoSubmitReimbursement, daoGetReimbursementByReimbursementId, daoUpdateReimbursement} from "../respositories/reimbursement-dao";
 
 
 //find reimbursement by status id
@@ -30,4 +30,21 @@ export function submitReimbursement(r:Reimbursement):Promise<Reimbursement>{
     }
 
 
+}
+
+//update reimbursement
+
+export async function updateReimbursement(newr:Reimbursement):Promise<Reimbursement>{
+    try{
+        let oldReimbursement=await daoGetReimbursementByReimbursementId(newr.reimbursementId);
+        for(let key in newr){
+            if(newr[key]!==oldReimbursement.hasOwnProperty(key)){
+                oldReimbursement[key]=newr[key];
+            }
+        }
+            return daoUpdateReimbursement(oldReimbursement);
+
+    }catch (e) {
+        throw e;
+    }
 }

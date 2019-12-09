@@ -1,5 +1,5 @@
 import express from 'express'
-import { getReimbursementByStatusId, getReimbursementByUserId,submitReimbursement} from '../services/reimbursement-service';
+import { getReimbursementByStatusId, getReimbursementByUserId,submitReimbursement, updateReimbursement} from '../services/reimbursement-service';
 import { authorization } from '../middleware/auth-middleware';
 
 import { Reimbursement } from '../models/reimbursement';
@@ -78,3 +78,17 @@ reimbursementRouter.post('', [authorization(['finance-manager', 'admin', 'user']
             res.status(e.status).send(e.message);
         }
     });
+
+    //updat reimbursement 
+
+    reimbursementRouter.patch('',[authorization(['finance-manager'])],async (req,res)=>{
+        try{
+            const {body}=req;
+            const uUser=await updateReimbursement(body);
+            res.status(200).json(uUser);
+        }catch (e) {
+            res.status(e.status).send(e.message);
+        }
+    });
+
+    

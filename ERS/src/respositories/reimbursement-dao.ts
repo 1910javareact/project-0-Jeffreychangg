@@ -65,8 +65,6 @@ export async function daoGetReimbursementByUserId(id: number): Promise<Reimburse
 //submit reimbursement
 
 
-//update reimbursement
-
 export async function daoSubmitReimbursement(r:Reimbursement):Promise<Reimbursement>{
     let client: PoolClient;
         client=await connectionPool.connect();
@@ -87,4 +85,70 @@ export async function daoSubmitReimbursement(r:Reimbursement):Promise<Reimbursem
         } finally {
             client && client.release();
         }
+}
+
+//find reimbursement by reimbursement id
+export async function daoGetReimbursementByReimbursementId(id: number): Promise<Reimbursement> {
+    let client: PoolClient;
+    try {
+        client = await connectionPool.connect();
+        console.log(id)
+        const result = await client.query('SELECT * FROM mspaper.reimbursement where reimbursement_id = $1',[id]);
+        if (result.rowCount > 0) {
+            return reimbursementDTOtoReimbursement(result.rows);
+        } else {
+            throw 'No Such Reimbursement';
+        }
+
+    } catch (e) {
+        if (e === 'No Such Reimbursement') {
+            throw {
+                status: 404,
+                message: 'this Reimbursement does not exist'
+            }; //this is an error
+        } else {
+            throw  {
+                status: 500,
+                message: 'Internal Error'
+            };
+        }
+    }finally {
+        client && client.release();
+    }
+
+}
+
+//update reimbursement
+
+export async function daoUpdateReimbursement(r: Reimbursement): Promise<Reimbursement> {
+    let client: PoolClient;
+    client = await connectionPool.connect();
+    try {
+   
+        
+        await client.query('BEGIN');
+        await client.query('update mspaper.reimbursement set date_resolved = $1, resolver = $2, status = $3 where reimbursement_id = $4',
+        [r.dateResolved, r.resolver, r.status,r.reimbursementId]);
+      
+        
+       // await client.query('update mspaper.user_role set role_id = $1 where user_id = $2',
+        //[user.role.roleId, user.userId]);
+        
+        const result = await client.query('SELECT * FROM mspaper.reimbursement where reimbursement_id = $1',
+        [r.reimbursementId]);
+        await client.query('COMMIT');
+        if (result.rowCount > 0) {
+            return reimbursementDTOtoReimbursement(result.rows);
+        } else {
+            throw 'No Such User';
+        }
+    } catch (e) {
+        await client.query('ROLLBACK');
+        throw {
+            status: 500,
+            message: 'Internal Server Error'
+        };
+    } finally {
+        client && client.release();
+    }
 }
