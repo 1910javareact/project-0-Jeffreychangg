@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllUsers, getUserById} from '../services/user-service';
+import { getAllUsers, getUserById, updateUser} from '../services/user-service';
 import { authorization } from '../middleware/auth-middleware';
 
 
@@ -48,14 +48,12 @@ userRouter.get('/:id', [authorization(['finance-manager', 'admin', 'user'])], as
 
 //update user 
 
-/*userRouter.patch('',[authorization(['admin'])],async(req,res)=>{
-    const {body}=req;
-
+userRouter.patch('', [authorization(['admin'])],async (req,res)=>{
     try{
-
-    }catch(e){
-        res.status(e.status).send(e.message);       
+        const {body}=req;
+        const uUser=await updateUser(body);
+        res.status(200).json(uUser);
+    }catch (e) {
+        res.status(e.status).send(e.message);
     }
-
-})
-*/
+});

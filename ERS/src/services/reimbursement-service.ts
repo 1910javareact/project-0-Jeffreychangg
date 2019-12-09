@@ -22,7 +22,7 @@ export function getReimbursementByUserId(id: number): Promise<Reimbursement[]> {
     }
 }
 
-export function submitReimbursement(r:Reimbursement):Promise<Reimbursement[]>{
+export function submitReimbursement(r:Reimbursement):Promise<Reimbursement>{
     try{
         return daoSubmitReimbursement(r);
     }catch (e) {

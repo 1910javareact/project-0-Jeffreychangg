@@ -1,4 +1,6 @@
-export class UserDTO{
+//DTO stands for data transfer object
+
+export class UserDTO{  //formate from the data base
       user_id: number // primary key
       username: string // not null, unique
       password: string // not null

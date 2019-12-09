@@ -1,5 +1,5 @@
 import { User } from "../models/user";
-import { daoGetUserByUsernameAndPassword, daoGetAllUsers, daoGetUserById} from "../respositories/user-dao";
+import { daoGetUserByUsernameAndPassword, daoGetAllUsers, daoGetUserById, daoUpdateUser} from "../respositories/user-dao";
 
 
 //find users by id
@@ -27,3 +27,19 @@ export function getUserByUsernameAndPassword(username: string, password:string):
     return daoGetUserByUsernameAndPassword(username, password);
 }
 
+//update user
+
+export async function updateUser(newU:User):Promise<User>{
+    try{
+        let oldUser=await daoGetUserById(newU.userId);
+        for(let key in newU){
+            if(newU[key]!==oldUser.hasOwnProperty(key)){
+                oldUser[key]=newU[key];
+            }
+        }
+            return daoUpdateUser(oldUser);
+
+    }catch (e) {
+        throw e;
+    }
+}

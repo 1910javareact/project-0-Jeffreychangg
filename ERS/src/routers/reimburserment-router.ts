@@ -55,7 +55,7 @@ reimbursementRouter.get('/author/:userId', [authorization(['finance-manager', 'a
 
 //submit
 reimbursementRouter.post('', [authorization(['finance-manager', 'admin', 'user'])],
-    async (req, res) => {
+    (req, res) => {
         const { body } = req;
         const newR = new Reimbursement(0, 0, 0, 0, 0, '', 0, 0, 0);
         try {
@@ -71,7 +71,7 @@ reimbursementRouter.post('', [authorization(['finance-manager', 'admin', 'user']
             }
             if (!error) {
                 newR.author = req.session.user.userId;
-                const reimbursement = await submitReimbursement(newR);
+                const reimbursement = submitReimbursement(newR);
                 res.status(201).json(reimbursement);
             }
         } catch (e) {

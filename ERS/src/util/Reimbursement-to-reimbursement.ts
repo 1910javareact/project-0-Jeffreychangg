@@ -1,6 +1,8 @@
 import { reimbursementDTO } from "../dtos/reimbursement-dto";
 import { Reimbursement } from "../models/reimbursement";
 
+
+//convert database formate to js formate
 export function reimbursementDTOtoReimbursement(rD: reimbursementDTO[]): Reimbursement{
    
     return new Reimbursement(

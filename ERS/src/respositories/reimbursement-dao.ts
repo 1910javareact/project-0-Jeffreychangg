@@ -1,7 +1,7 @@
 import { PoolClient } from "pg";
 import { Reimbursement } from "../models/reimbursement";
 import { connectionPool } from ".";
-import {  multiReimbursementDTOConvertor } from "../util/Reimbursement-to-reimbursement";
+import {  multiReimbursementDTOConvertor, reimbursementDTOtoReimbursement } from "../util/Reimbursement-to-reimbursement";
 
 
 //find reimbursement by status id
@@ -67,18 +67,19 @@ export async function daoGetReimbursementByUserId(id: number): Promise<Reimburse
 
 //update reimbursement
 
-export async function daoSubmitReimbursement(r:Reimbursement):Promise<Reimbursement[]>{
+export async function daoSubmitReimbursement(r:Reimbursement):Promise<Reimbursement>{
     let client: PoolClient;
         client=await connectionPool.connect();
         try{
             await client.query('BEGIN')
-            const result=await client.query('insert into mspaper.reimbursement (author,amount,date_submitted,date_resolved,description,resolver,status,"type") values ($1, $2, $3, $4, $5, $6, $7, $8) returning reimbursement_id', 
+            const input=await client.query('insert into mspaper.reimbursement (author,amount,date_submitted,date_resolved,description,resolver,status,"type") values ($1, $2, $3, $4, $5, $6, $7, $8) returning reimbursement_id', 
             [r.author, r.amount, r.dateSubmitted, r.dateResolved, r.description, r.resolver, r.status, r.type])
-
+            const result = await client.query('SELECT * FROM mspaper.reimbursement where reimbursement_id = $1',
+            [input.rows[0].reimbursement_id])
             await client.query('COMMIT')
-            return multiReimbursementDTOConvertor(result.rows[0]);
+            return reimbursementDTOtoReimbursement(result.rows);
         }catch(e){
-            await client.query('ROOLBACK')
+            client.query('ROOLBACK')
             throw {
                 status: e.status,
                 message: e.message

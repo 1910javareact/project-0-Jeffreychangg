@@ -89,3 +89,34 @@ export async function daoGetUserById(id: number): Promise<User> {
 
 }
 
+//update user
+export async function daoUpdateUser(user: User): Promise<User> {
+    let client: PoolClient;
+    client = await connectionPool.connect();
+    try {
+
+        await client.query('BEGIN');
+        await client.query('update mspaper."user" set username = $1, password = $2, first_name = $3, last_name = $4, email = $5 where user_id = $6',
+        [user.username, user.password, user.firstName, user.lastName, user.email, user.userId]);
+        await client.query('update mspaper.user_role set role_id = $1 where user_id = $2',
+        [user.role.roleId, user.userId]);
+        
+        const result = await client.query('SELECT * FROM mspaper."user" natural join mspaper.user_role natural join mspaper."role" where user_id = $1',
+        [user.userId]);
+        await client.query('COMMIT');
+        console.log(user)
+        if (result.rowCount > 0) {
+            return userDTOtoUser(result.rows);
+        } else {
+            throw 'No Such User';
+        }
+    } catch (e) {
+        await client.query('ROLLBACK');
+        throw {
+            status: 500,
+            message: 'Internal Server Error'
+        };
+    } finally {
+        client && client.release();
+    }
+}
